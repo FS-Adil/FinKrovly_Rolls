@@ -25,7 +25,18 @@ export default defineConfig(({ mode }) => {
           name: 'Rolls',
           short_name: 'Rolls',
           theme_color: '#ffffff',
-          icons: [/* иконки 192x192 и 512x512 */]
+          icons: [
+            {
+              src: 'icon-192.png',
+              sizes: '192x192',
+              type: 'image/png'
+            },
+            {
+              src: 'icon-512.png',
+              sizes: '512x512',
+              type: 'image/png'
+            }
+          ]
         }
       })
     ],
