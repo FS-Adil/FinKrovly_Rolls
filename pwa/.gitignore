@@ -26,4 +26,6 @@ dist-ssr
 .env
 .prod.env
 .nginx_conf
+.pipeline
+.docker-compose.pwa.rolls.yml
 
