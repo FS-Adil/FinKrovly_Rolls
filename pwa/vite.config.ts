@@ -27,17 +27,17 @@ export default defineConfig(({ mode }) => {
           theme_color: '#ffffff',
           icons: [
             {
-              src: 'icon-192.png',
+              src: 'pwa-192x192.png',
               sizes: '192x192',
               type: 'image/png'
             },
             {
-              src: 'icon-512.png',
+              src: 'pwa-512x512.png',
               sizes: '512x512',
               type: 'image/png'
             },
             {
-              src: 'icon-512.png',
+              src: 'pwa-512x512.png',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'maskable'
@@ -45,14 +45,14 @@ export default defineConfig(({ mode }) => {
           ],
           screenshots: [
             {
-              src: 'screenshot-wide.png',
+              src: 'pwa-screenshot-wide.png',
               sizes: '1280x720',
               type: 'image/png',
               form_factor: 'wide',
               label: 'Rolls Desktop'
             },
             {
-              src: 'screenshot-narrow.png',
+              src: 'pwa-screenshot-narrow.png',
               sizes: '720x1280',
               type: 'image/png',
               form_factor: 'narrow',
