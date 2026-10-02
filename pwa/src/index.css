@@ -1,111 +1,254 @@
+/* ============================================================
+   Базовые сбросы и переменные темы
+   ============================================================ */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --color-primary: #1976d2;
+  --color-primary-dark: #115293;
+  --color-text: #1f2937;
+  --color-muted: #6b7280;
+  --color-bg: #f5f7fa;
+  --color-surface: #ffffff;
+  --color-border: #e5e7eb;
+  --color-error: #c62828;
+  --color-success: #2e7d32;
+  --radius: 10px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --tabbar-height: 64px;      /* высота нижней панели вкладок */
+  --header-height: 88px;      /* высота блока профиля */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+* { box-sizing: border-box; }
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+html, body, #root {
+  height: 100%;
+  margin: 0;
 }
 
 body {
-  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+button { cursor: pointer; font: inherit; }
+
+/* ============================================================
+   Общие контейнеры
+   ============================================================ */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+/* ============================================================
+   Формы
+   ============================================================ */
+label {
+  display: block;
+  font-size: 14px;
+  color: var(--color-muted);
+  margin-bottom: 4px;
 }
 
-code {
+input, select {
+  width: 100%;
+  padding: 10px 12px;
+  margin: 0 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
   font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  background: #fff;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.15);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: background .15s;
+}
+.btn-primary:hover:not(:disabled) { background: var(--color-primary-dark); }
+.btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  padding: 10px 16px;
+  border-radius: 6px;
+}
+
+.error   { color: var(--color-error);   margin-top: 8px; font-size: 14px; }
+.success { color: var(--color-success); margin-top: 8px; font-size: 14px; }
+
+/* ============================================================
+   Экраны Welcome / Login
+   ============================================================ */
+.screen-center {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.screen-center .card {
+  width: 100%;
+  max-width: 420px;
+  margin: 0;
+}
+
+/* ============================================================
+   Layout дашборда: header сверху, контент в центре, tabbar снизу
+   ============================================================ */
+
+/* Обёртка всего дашборда занимает всю высоту вьюпорта */
+.dashboard {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* Отступ снизу, равный высоте фиксированной панели вкладок,
+     чтобы контент не прятался за ней. */
+  padding-bottom: var(--tabbar-height);
+}
+
+/* Верхняя шапка с профилем — фиксируем сверху */
+.dashboard-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-header .inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.profile-info h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
+.profile-info .meta {
+  color: var(--color-muted);
+  font-size: 13px;
+  margin: 2px 0;
+}
+
+.profile-info .roles {
+  display: inline-flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.role-badge {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e3f2fd;
+  color: var(--color-primary-dark);
+}
+.role-badge.admin {
+  background: #fff3e0;
+  color: #b26a00;
+}
+
+/* Основная область контента */
+.dashboard-main {
+  flex: 1;
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* ============================================================
+   Нижняя панель вкладок (fixed, как у мобильных приложений)
+   ============================================================ */
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--tabbar-height);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  justify-content: center;
+  z-index: 20;
+  /* Поддержка "безопасной зоны" на iPhone с чёлкой */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.tabbar-inner {
+  display: flex;
+  width: 100%;
+  max-width: 960px;
+  justify-content: space-around;
+  align-items: stretch;
+}
+
+.tabbar .tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 12px;
+  padding: 8px 4px;
+  transition: color .15s, background .15s;
+}
+
+.tabbar .tab:hover { background: rgba(25, 118, 210, 0.06); }
+
+.tabbar .tab.active {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.tabbar .tab-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* ============================================================
+   Адаптив: на десктопе вкладки тоже снизу, но контейнер шире
+   ============================================================ */
+@media (min-width: 768px) {
+  .tabbar .tab { font-size: 13px; }
+  .tabbar .tab-icon { font-size: 22px; }
 }
