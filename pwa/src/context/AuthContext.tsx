@@ -9,16 +9,6 @@ import {
 import { api } from '../api/client';
 import type { User } from '../api/types';
 
-// ===== DEV BYPASS =====
-const BYPASS = import.meta.env.VITE_DEV_BYPASS === 'true';
-const MOCK_USER: User = {
-  username: 'dev',
-  fullName: 'Dev User',
-  role: 'ADMIN',
-  organization: 'TEST ORG'
-};
-// ======================
-
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
@@ -29,30 +19,19 @@ interface AuthContextValue {
 const AuthCtx = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(BYPASS ? MOCK_USER : null);
-  const [loading, setLoading] = useState(!BYPASS);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (BYPASS) {
-      setLoading(false);
-      setUser(MOCK_USER);
-      return;
-    }
-
     let cancelled = false;
     api.me()
       .then(u => { if (!cancelled) setUser(u); })
       .catch(() => { if (!cancelled) setUser(null); })
       .finally(() => { if (!cancelled) setLoading(false); });
-
     return () => { cancelled = true; };
   }, []);
 
   const login = useCallback(async (username: string, password: string): Promise<User> => {
-    if (BYPASS) {
-      setUser(MOCK_USER);
-      return MOCK_USER;
-    }
     const u = await api.login(username, password);
     const user: User = {
       username: u.username,
@@ -65,10 +44,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    if (BYPASS) {
-      setUser(MOCK_USER);
-      return;
-    }
     try { await api.logout(); } catch { /* ignore */ }
     setUser(null);
   }, []);
