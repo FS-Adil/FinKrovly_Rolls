@@ -4,9 +4,10 @@ import type {
   ReportParams,
   ReportResponse,
   User
-} from './types'
+} from './types';
 
-const BASE = '/api';
+const APP_BASE = import.meta.env.VITE_APP_BASE || '/';
+const BASE = `${APP_BASE.replace(/\/$/, '')}/api`;
 
 export class ApiError extends Error {
   status: number;
@@ -50,7 +51,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     if (r.ok) {
       return request<T>(path, { ...options, _retry: true });
     }
-    window.location.href = '/login';
+    window.location.href = `${APP_BASE.replace(/\/$/, '')}/login`;
     throw new ApiError('Unauthorized', 401);
   }
 

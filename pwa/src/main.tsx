@@ -10,12 +10,15 @@ import { registerSW } from 'virtual:pwa-register'
 
 registerSW({ immediate: true })
 
+const APP_BASE = import.meta.env.VITE_APP_BASE || '/';
+const basename = APP_BASE.replace(/\/$/, '');
+
 const rootEl = document.getElementById('root');
 if (!rootEl) throw new Error('Root element not found');
 
 ReactDOM.createRoot(rootEl).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <AuthProvider>
         <App />
       </AuthProvider>
