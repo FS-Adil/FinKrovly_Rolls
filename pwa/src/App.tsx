@@ -1,14 +1,23 @@
-import Dashboard from './components/Dashboard'
+import { Navigate, Route, Routes } from 'react-router-dom';
+import StartPage from './pages/StartPage';
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
-/**
- * Корневой компонент-роутер (без react-router — в примере хватает
- * простого переключения состояний).
- *
- * Логика:
- *  - loading        → сплэш
- *  - нет user       → Welcome / Login
- *  - есть user      → Dashboard
- */
 export default function App() {
-  return <Dashboard />
+  return (
+    <Routes>
+      <Route path="/" element={<StartPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/app/*"
+        element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }

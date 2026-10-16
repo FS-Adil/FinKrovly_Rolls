@@ -1,254 +1,78 @@
-/* ============================================================
-   Базовые сбросы и переменные темы
-   ============================================================ */
-:root {
-  --color-primary: #1976d2;
-  --color-primary-dark: #115293;
-  --color-text: #1f2937;
-  --color-muted: #6b7280;
-  --color-bg: #f5f7fa;
-  --color-surface: #ffffff;
-  --color-border: #e5e7eb;
-  --color-error: #c62828;
-  --color-success: #2e7d32;
-  --radius: 10px;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --tabbar-height: 64px;      /* высота нижней панели вкладок */
-  --header-height: 88px;      /* высота блока профиля */
-}
-
 * { box-sizing: border-box; }
-
-html, body, #root {
-  height: 100%;
-  margin: 0;
-}
-
+html, body, #root { height: 100%; margin: 0; }
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: var(--color-bg);
-  color: var(--color-text);
-  -webkit-font-smoothing: antialiased;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #0f172a; color: #e2e8f0;
 }
+button, input { font: inherit; }
 
-button { cursor: pointer; font: inherit; }
+.btn { border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer; font-weight: 600; transition: .15s; }
+.btn--primary { background: #3b82f6; color: #fff; }
+.btn--primary:hover { background: #2563eb; }
+.btn--primary:disabled { opacity: .6; cursor: default; }
+.btn--ghost { background: transparent; color: #cbd5e1; border: 1px solid #334155; }
+.btn--xl { font-size: 1.1rem; padding: 16px 40px; }
 
-/* ============================================================
-   Общие контейнеры
-   ============================================================ */
-.container {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 24px;
+.start, .login {
+  min-height: 100%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px; padding: 24px;
 }
+.start__logo { font-size: 72px; }
+.start__title { margin: 0; font-size: 2rem; }
+.start__sub { color: #94a3b8; margin: 0 0 24px; }
 
 .card {
-  background: var(--color-surface);
-  border-radius: var(--radius);
-  padding: 24px;
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 16px;
+  background: #1e293b; padding: 24px; border-radius: 16px;
+  display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 380px;
+}
+.card--flat { max-width: none; }
+.card h2 { margin: 0 0 8px; }
+.card label { display: flex; flex-direction: column; gap: 6px; font-size: .9rem; color: #cbd5e1; }
+.card input {
+  background: #0f172a; border: 1px solid #334155; color: #e2e8f0;
+  padding: 10px 12px; border-radius: 8px;
 }
 
-/* ============================================================
-   Формы
-   ============================================================ */
-label {
-  display: block;
-  font-size: 14px;
-  color: var(--color-muted);
-  margin-bottom: 4px;
+.error { color: #f87171; font-size: .9rem; }
+.empty { color: #94a3b8; padding: 24px; text-align: center; }
+.splash { display: flex; align-items: center; justify-content: center; min-height: 100vh; color: #94a3b8; }
+
+.app { min-height: 100%; display: flex; flex-direction: column; padding-bottom: 72px; }
+.app__header {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; background: #0f172a; border-bottom: 1px solid #1e293b;
+}
+.app__user-name { font-weight: 700; }
+.app__user-org { font-size: .8rem; color: #94a3b8; }
+.app__content { flex: 1; padding: 16px; }
+
+.tabs {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; background: #0b1220; border-top: 1px solid #1e293b;
+  padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
+}
+.tabs__item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  color: #94a3b8; text-decoration: none; font-size: .7rem; padding: 6px 2px; transition: color .15s;
+}
+.tabs__item--active { color: #3b82f6; }
+.tabs__icon { font-size: 1.3rem; }
+
+.report { display: flex; flex-direction: column; gap: 16px; }
+.report__title { margin: 0; font-size: 1.3rem; }
+.report__filters {
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: end;
+  background: #1e293b; padding: 12px; border-radius: 12px;
+}
+.report__filters label { display: flex; flex-direction: column; gap: 4px; font-size: .8rem; color: #cbd5e1; }
+.report__filters input {
+  background: #0f172a; border: 1px solid #334155; color: #e2e8f0;
+  padding: 8px 10px; border-radius: 8px;
 }
 
-input, select {
-  width: 100%;
-  padding: 10px 12px;
-  margin: 0 0 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  font-size: 15px;
-  background: #fff;
-  transition: border-color .15s, box-shadow .15s;
-}
-
-input:focus, select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.15);
-}
-
-.btn-primary {
-  background: var(--color-primary);
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 15px;
-  transition: background .15s;
-}
-.btn-primary:hover:not(:disabled) { background: var(--color-primary-dark); }
-.btn-primary:disabled { opacity: .6; cursor: not-allowed; }
-
-.btn-ghost {
-  background: transparent;
-  border: 1px solid var(--color-border);
-  padding: 10px 16px;
-  border-radius: 6px;
-}
-
-.error   { color: var(--color-error);   margin-top: 8px; font-size: 14px; }
-.success { color: var(--color-success); margin-top: 8px; font-size: 14px; }
-
-/* ============================================================
-   Экраны Welcome / Login
-   ============================================================ */
-.screen-center {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.screen-center .card {
-  width: 100%;
-  max-width: 420px;
-  margin: 0;
-}
-
-/* ============================================================
-   Layout дашборда: header сверху, контент в центре, tabbar снизу
-   ============================================================ */
-
-/* Обёртка всего дашборда занимает всю высоту вьюпорта */
-.dashboard {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  /* Отступ снизу, равный высоте фиксированной панели вкладок,
-     чтобы контент не прятался за ней. */
-  padding-bottom: var(--tabbar-height);
-}
-
-/* Верхняя шапка с профилем — фиксируем сверху */
-.dashboard-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
-}
-
-.dashboard-header .inner {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 16px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.profile-info h2 {
-  margin: 0 0 4px;
-  font-size: 18px;
-}
-
-.profile-info .meta {
-  color: var(--color-muted);
-  font-size: 13px;
-  margin: 2px 0;
-}
-
-.profile-info .roles {
-  display: inline-flex;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.role-badge {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: #e3f2fd;
-  color: var(--color-primary-dark);
-}
-.role-badge.admin {
-  background: #fff3e0;
-  color: #b26a00;
-}
-
-/* Основная область контента */
-.dashboard-main {
-  flex: 1;
-  max-width: 960px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 24px;
-}
-
-/* ============================================================
-   Нижняя панель вкладок (fixed, как у мобильных приложений)
-   ============================================================ */
-.tabbar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: var(--tabbar-height);
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
-  display: flex;
-  justify-content: center;
-  z-index: 20;
-  /* Поддержка "безопасной зоны" на iPhone с чёлкой */
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.tabbar-inner {
-  display: flex;
-  width: 100%;
-  max-width: 960px;
-  justify-content: space-around;
-  align-items: stretch;
-}
-
-.tabbar .tab {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  border: none;
-  background: transparent;
-  color: var(--color-muted);
-  font-size: 12px;
-  padding: 8px 4px;
-  transition: color .15s, background .15s;
-}
-
-.tabbar .tab:hover { background: rgba(25, 118, 210, 0.06); }
-
-.tabbar .tab.active {
-  color: var(--color-primary);
-  font-weight: 600;
-}
-
-.tabbar .tab-icon {
-  font-size: 20px;
-  line-height: 1;
-}
-
-/* ============================================================
-   Адаптив: на десктопе вкладки тоже снизу, но контейнер шире
-   ============================================================ */
-@media (min-width: 768px) {
-  .tabbar .tab { font-size: 13px; }
-  .tabbar .tab-icon { font-size: 22px; }
-}
+.table-wrap { overflow-x: auto; background: #1e293b; border-radius: 12px; }
+.table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.table th, .table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #334155; white-space: nowrap; }
+.table th { color: #94a3b8; font-weight: 600; font-size: .8rem; text-transform: uppercase; }
+.table tbody tr:last-child td { border-bottom: 0; }
