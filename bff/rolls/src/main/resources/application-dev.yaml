@@ -55,7 +55,7 @@ app:
 # ============================================
 logging:
   level:
-    com.company.costbff: ${APP_LOG_LEVEL}
+    com.example.rolls: ${APP_LOG_LEVEL}
     org.springframework.security: ${SECURITY_LOG_LEVEL}
     org.springframework.data.redis: WARN
     io.lettuce.core: WARN

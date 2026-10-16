@@ -14,11 +14,15 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       VitePWA({
+        base,
+        scope: base,
         registerType: 'autoUpdate',
         workbox: {
           globPatterns: ["**/*{html,css,js,ico,png,svg}"]
         },
         manifest: {
+          start_url: base,
+          scope: base,
           name: 'Rolls',
           short_name: 'Rolls',
           theme_color: '#ffffff',
@@ -62,7 +66,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: parseInt(env.VITE_APP_PORT),
       proxy: {
-        '/api': { 
+        [`${base}api`]: { 
           target: env.VITE_BFF_URL, 
           changeOrigin: true 
         }
