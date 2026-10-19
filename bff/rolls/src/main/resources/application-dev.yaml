@@ -49,6 +49,16 @@ app:
       url: ${AUTH_SERVICE_URL}
       service-token: ${AUTH_SERVICE_TOKEN}
 
+  # Настройки сессии
+  session:
+    ttl-minutes: ${SESSION_TTL}
+    max-concurrent-sessions: 5
+  # Настройки cookie
+  cookie:
+#    domain: ${COOKIE_DOMAIN}
+    secure: ${COOKIE_SECURE}
+    same-site: ${COOKIE_SAME_SITE}
+
 
 # ============================================
 # LOGGING

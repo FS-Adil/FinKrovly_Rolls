@@ -6,8 +6,9 @@ import type {
   User
 } from './types';
 
-const APP_BASE = import.meta.env.VITE_APP_BASE || '/';
-const BASE = `${APP_BASE.replace(/\/$/, '')}/api`;
+const APP_BASE = import.meta.env.VITE_APP_BASE;
+const BFF_URL = import.meta.env.VITE_BFF_URL;
+const BASE = `${BFF_URL}/api`;
 
 export class ApiError extends Error {
   status: number;
@@ -19,39 +20,33 @@ export class ApiError extends Error {
 }
 
 interface RequestOptions extends RequestInit {
-  _retry?: boolean;
+  /** Не редиректить на /login при 401 (для проверочных запросов вроде /auth/me) */
+  skipAuthRedirect?: boolean;
 }
 
-let refreshing: Promise<Response> | null = null;
-
-async function refreshSession(): Promise<Response> {
-  if (!refreshing) {
-    refreshing = fetch(`${BASE}/auth/refresh`, {
-      method: 'POST',
-      credentials: 'include'
-    }).finally(() => {
-      refreshing = null;
-    });
-  }
-  return refreshing;
+function redirectToLogin(): void {
+  const loginPath = `${APP_BASE.replace(/\/$/, '')}/login`;
+  // Уже на странице логина — не редиректим, иначе получим петлю
+  if (window.location.pathname === loginPath) return;
+  window.location.href = loginPath;
 }
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const { skipAuthRedirect, ...fetchOptions } = options;
+
   const res = await fetch(BASE + path, {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      ...(options.headers ?? {})
+      ...(fetchOptions.headers ?? {})
     },
-    ...options
+    ...fetchOptions
   });
 
-  if (res.status === 401 && !options._retry) {
-    const r = await refreshSession();
-    if (r.ok) {
-      return request<T>(path, { ...options, _retry: true });
+  if (res.status === 401) {
+    if (!skipAuthRedirect) {
+      redirectToLogin();
     }
-    window.location.href = `${APP_BASE.replace(/\/$/, '')}/login`;
     throw new ApiError('Unauthorized', 401);
   }
 
@@ -70,14 +65,15 @@ export const api = {
   login: (email: string, password: string): Promise<LoginResponse> =>
     request<LoginResponse>('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password }),
+      skipAuthRedirect: true // 401 здесь = неверные креды, редирект не нужен
     }),
 
   logout: (): Promise<void> =>
     request<void>('/auth/logout', { method: 'POST' }),
 
-  me: (): Promise<User> =>
-    request<User>('/auth/me'),
+  me: (opts?: { skipAuthRedirect?: boolean }): Promise<User> =>
+    request<User>('/auth/me', { skipAuthRedirect: opts?.skipAuthRedirect }),
 
   calculate: (report: ReportName, params: ReportParams = {}): Promise<ReportResponse> =>
     request<ReportResponse>(`/reports/${report}`, {

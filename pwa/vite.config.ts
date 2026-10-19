@@ -65,12 +65,6 @@ export default defineConfig(({ mode }) => {
     ],
     server: {
       port: parseInt(env.VITE_APP_PORT),
-      proxy: {
-        [`${base}api`]: { 
-          target: env.VITE_BFF_URL, 
-          changeOrigin: true 
-        }
-      }
     }
   }
 })
