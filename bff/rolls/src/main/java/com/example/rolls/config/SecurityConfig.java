@@ -105,7 +105,7 @@ public class SecurityConfig {
 
         // Разрешенные источники (в production - конкретные домены)
         configuration.setAllowedOrigins(List.of(
-                "http://localhost:4000")
+                "http://localhost:4000", "https://pwa.rolls.finkrovl.ru")
         );
 
         // Разрешенные HTTP методы
