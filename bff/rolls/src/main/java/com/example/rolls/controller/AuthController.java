@@ -33,6 +33,7 @@ public class AuthController {
     private final TracerUtil tracerUtil;
     private final SessionService sessionService;
     private final CookieService cookieService;
+    private final ObjectMapper objectMapper;
 
 
     @Operation(summary = "Аутентификация", description = "Отправка логина и пароля")
@@ -43,7 +44,6 @@ public class AuthController {
             HttpServletResponse httpResponse) {
 
         Map<String, Object> data = new HashMap<>();
-        ObjectMapper mapper = new ObjectMapper();
 
         try {
 
@@ -55,13 +55,12 @@ public class AuthController {
                 );
             }
 
-            JsonNode root = mapper.valueToTree(
+            JsonNode root = objectMapper.valueToTree(
                     authServiceClient.authenticate(email, request.password())
             );
 
             String orgName = root.path("data").path("organization").path("name").asString();
             String orgId = root.path("data").path("organization").path("id").asString();
-            String token = root.path("data").path("accessToken").asString();
             String userEmail = root.path("data").path("user").path("email").asString();
             Long userId = root.path("data").path("user").path("id").asLong();
             String userRole = root.path("data").path("user").path("role").asString();
@@ -96,8 +95,8 @@ public class AuthController {
                     ApiResponse.success(tracerUtil.currentTraceId(), data)
             );
         } catch (Exception e) {
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            log.error("Login failed for email: {}", request.email(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     ApiResponse.error(tracerUtil.currentTraceId(), 500, "Внутренняя ошибка сервера")
             );
         }
@@ -137,6 +136,11 @@ public class AuthController {
             return ResponseEntity.status(401).body(
                     ApiResponse.error(tracerUtil.currentTraceId(), 401, "Сессия не найдена или истекла")
             );
+        } catch (SecurityException e) {
+            log.warn("Security violation: {}", e.getMessage());
+            return ResponseEntity.status(401).body(
+                    ApiResponse.error(tracerUtil.currentTraceId(), 401, "Сессия недействительна")
+            );
         }
     }
 
@@ -149,6 +153,8 @@ public class AuthController {
             // Проверяем текущую сессию
             var userContext = sessionService.getUserContext(request);
 
+            String oldSessionId = cookieService.readSessionId(request);
+
             // Создаем новую сессию
             String newSessionId = sessionService.createSession(
                     userContext.userId(),
@@ -160,6 +166,10 @@ public class AuthController {
                     request.getHeader("User-Agent"),
                     request.getRemoteAddr()
             );
+
+            if (oldSessionId != null && !oldSessionId.equals(newSessionId)) {
+                sessionService.deleteSession(oldSessionId);               // ✅ удаляем старую
+            }
 
             // Устанавливаем новую cookie
             cookieService.setSessionCookie(response, newSessionId, 1800);
@@ -212,6 +222,6 @@ public class AuthController {
      * Извлекает sessionId из cookie __Host-session_id.
      */
     private String extractSessionId(HttpServletRequest request) {
-        return CookieService.readSessionId(request);
+        return cookieService.readSessionId(request);
     }
 }

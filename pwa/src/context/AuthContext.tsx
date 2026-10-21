@@ -24,7 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    api.me()
+    api.me( {skipAuthRedirect: true} )
       .then(u => { if (!cancelled) setUser(u); })
       .catch(() => { if (!cancelled) setUser(null); })
       .finally(() => { if (!cancelled) setLoading(false); });

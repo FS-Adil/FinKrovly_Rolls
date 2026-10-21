@@ -13,8 +13,10 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -41,15 +43,19 @@ public class SecurityConfig {
 
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                        .ignoringRequestMatchers("/api/auth/**")
+                        .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
+                        // только login (и register, если нужно) без CSRF; logout — с CSRF
+                        .ignoringRequestMatchers("/api/auth/login", "/api/auth/register")
                 )
+
+                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
 
                 .addFilterBefore(sessionAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
                 // Сессии создаются по требованию (логин), хранятся в Redis
                 .sessionManagement(sm -> sm
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .sessionAuthenticationStrategy(new NullAuthenticatedSessionStrategy())
                 )
 
                 .authorizeHttpRequests(auth -> auth
@@ -57,7 +63,6 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/me",
-                                "/api/auth/logout",
 
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
@@ -73,11 +78,14 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                // 🔑 МЕНЯЕМ: 401 вместо 403, без "save request → redirect"
-//                .exceptionHandling(eh -> eh
-//                        .authenticationEntryPoint((req, res, ex) ->
-//                                res.sendError(HttpServletResponse.SC_UNAUTHORIZED))
-//                )
+                .exceptionHandling(eh -> eh
+                        .authenticationEntryPoint((req, res, ex) -> {
+                            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            res.setContentType("application/json;charset=UTF-8");
+                            res.getWriter().write(
+                                    "{\"error\":\"Unauthorized\",\"message\":\"Требуется аутентификация\"}");
+                        })
+                )
 
                 // ==================== ОТКЛЮЧАЕМ НЕИСПОЛЬЗУЕМОЕ ====================
                 .formLogin(AbstractHttpConfigurer::disable)   // Нет формы логина
@@ -105,7 +113,7 @@ public class SecurityConfig {
 
         // Разрешенные источники (в production - конкретные домены)
         configuration.setAllowedOrigins(List.of(
-                "http://localhost:4000", "https://pwa.rolls.finkrovl.ru")
+                "http://localhost:4000", "https://pwa.rolls.finkrovl.ru", "http://localhost:4173")
         );
 
         // Разрешенные HTTP методы
@@ -113,7 +121,16 @@ public class SecurityConfig {
                 "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
         ));
 
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+//        configuration.setAllowedHeaders(Arrays.asList("*"));
+
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Content-Type",
+                "X-XSRF-TOKEN",
+                "Authorization",
+                "Accept",
+                "Origin",
+                "X-Requested-With"
+        ));
 
         // Разрешить отправку кук
         configuration.setAllowCredentials(true);

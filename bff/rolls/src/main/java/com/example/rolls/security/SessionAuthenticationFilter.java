@@ -1,9 +1,9 @@
 package com.example.rolls.security;
 
+import com.example.rolls.service.CookieService;
 import com.example.rolls.service.SessionService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +24,7 @@ import java.util.List;
 public class SessionAuthenticationFilter extends OncePerRequestFilter {
 
     private final SessionService sessionService;
+    private final CookieService cookieService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -70,26 +71,30 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
      * Извлекает sessionId:
      * 1. Cookie (для обычного режима)
      */
+//    private String extractSessionId(HttpServletRequest request) {
+//        // 🔑 Стратегия 1: Cookie
+//        String sessionId = getCookieValue(request, "session_id");
+//        if (sessionId != null) {
+//            log.info("🔍 Session ID from cookie");
+//            return sessionId;
+//        }
+//
+//        return null;
+//    }
+
+//    private String getCookieValue(HttpServletRequest request, String cookieName) {
+//        Cookie[] cookies = request.getCookies();
+//        if (cookies != null) {
+//            for (Cookie cookie : cookies) {
+//                if (cookieName.equals(cookie.getName())) {
+//                    return cookie.getValue();
+//                }
+//            }
+//        }
+//        return null;
+//    }
+
     private String extractSessionId(HttpServletRequest request) {
-        // 🔑 Стратегия 1: Cookie
-        String sessionId = getCookieValue(request, "session_id");
-        if (sessionId != null) {
-            log.info("🔍 Session ID from cookie");
-            return sessionId;
-        }
-
-        return null;
-    }
-
-    private String getCookieValue(HttpServletRequest request, String cookieName) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookieName.equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
+        return cookieService.readSessionId(request);
     }
 }

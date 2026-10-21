@@ -1,0 +1,81 @@
+.rolls-page { max-width: 1200px; margin: 0 auto; padding: 16px; }
+.rolls-page__toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.rolls-page__title { margin: 0; font-size: 24px; font-weight: 700; color: #333; }
+.rolls-page__search { margin: 12px 0; }
+.rolls-page__search input {
+  width: 100%; padding: 10px 14px; border-radius: 24px;
+  border: 1px solid #e0e0e0; background: #f0f0f0; font-size: 16px;
+  box-sizing: border-box;
+}
+.rolls-page__results { margin: 8px 0; color: #666; font-style: italic; text-align: center; }
+.rolls-page__controls { display: flex; gap: 10px; justify-content: center; margin: 12px 0; }
+
+.organization { margin-bottom: 12px; }
+.organization__header {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  background: #2c3e50; color: #fff; border: 0; border-radius: 8px;
+  padding: 14px 16px; cursor: pointer; text-align: left;
+}
+.organization__title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 18px; font-weight: 700; text-transform: uppercase;
+}
+.organization__info { display: flex; gap: 15px; color: #bdc3c7; font-size: 13px; }
+
+.manufacturer { margin: 12px 0 0 16px; }
+.manufacturer__header {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  background: none; border: 0; padding: 6px 0; cursor: pointer; text-align: left;
+}
+.manufacturer__title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 16px; font-weight: 600; color: #34495e;
+}
+.manufacturer__badge {
+  background: #ecf0f1; border-radius: 12px; padding: 2px 10px;
+  color: #7f8c8d; font-size: 12px;
+}
+
+.roll-card {
+  background: #fff; border-radius: 10px; padding: 14px;
+  margin: 12px 0 12px 16px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+.roll-card__header {
+  display: flex; align-items: center; gap: 8px;
+  padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #ecf0f1;
+}
+.roll-card__name { flex: 1; font-weight: 700; color: #2c3e50; }
+.roll-card__badge {
+  background: #ebf5fb; color: #3498db; border-radius: 12px;
+  padding: 2px 10px; font-size: 12px;
+}
+
+.roll-table-wrap { overflow-x: auto; }
+.roll-table { width: 100%; min-width: 580px; border-collapse: collapse; font-size: 12px; }
+.roll-table th {
+  background: #34495e; color: #fff; padding: 10px 6px;
+  font-weight: 700; text-align: center;
+}
+.roll-table td {
+  padding: 10px 6px; text-align: center; color: #2c3e50;
+  border-bottom: 1px solid #ecf0f1;
+}
+.roll-table tbody tr.odd { background: #f8f9fa; }
+.roll-table tfoot td {
+  background: #ebf5fb; font-weight: 700;
+  border-top: 2px solid #3498db; color: #2980b9;
+}
+
+.chevron { display: inline-block; width: 14px; color: inherit; }
+.error {
+  background: #f5c1c8; color: #c0392b; border: 1px solid #c0392b;
+  padding: 12px; border-radius: 8px; margin: 12px 0; cursor: pointer;
+}
+.empty { text-align: center; color: #999; padding: 40px 0; }
+
+.btn {
+  padding: 8px 16px; border-radius: 20px; border: 0; cursor: pointer;
+  font-weight: 600; background: #3498db; color: #fff;
+}
+.btn:disabled { background: #95a5a6; cursor: default; }
+.btn--primary { background: #27ae60; }

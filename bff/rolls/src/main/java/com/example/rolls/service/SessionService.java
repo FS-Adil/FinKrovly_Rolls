@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class SessionService {
 
     private final RedisTemplate<String, Object> redisTemplate;
+    private final CookieService cookieService;
 
     private static final String SESSION_PREFIX = "session:";
     private final SecureRandom secureRandom = new SecureRandom();
@@ -169,7 +170,7 @@ public class SessionService {
      * Единая точка чтения через CookieService.readSessionId.
      */
     private String extractSessionId(HttpServletRequest request) {
-        String sessionId = CookieService.readSessionId(request);
+        String sessionId = cookieService.readSessionId(request);
         if (sessionId != null && !sessionId.isEmpty()) {
             log.info("Session ID extracted from cookie");
             return sessionId;

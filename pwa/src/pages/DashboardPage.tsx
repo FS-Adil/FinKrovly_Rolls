@@ -1,18 +1,19 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import BottomTabs from '../components/ButtomTabs';
-import SettingsTab from '../tabs/SettingsTab';
+import SettingsTab from './tabs/SettingsTab';
 import FinancialTab from './tabs/FinancialTab';
 import SalesTab from './tabs/SalesTab';
-import RollsTab from '../tabs/RollsTab';
+import RollsTab from './tabs/RollsTab';
 import GoodsTab from './tabs/GoodsTab';
+import Profile from './tabs/Profile';
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
   if (!user) return null;
 
   const isAdmin = user.role === 'ADMIN';
-  const defaultPath = isAdmin ? '/app/settings' : '/app/financial';
+  const defaultPath = isAdmin ? '/app/settings' : '/app/profile';
 
   return (
     <div className="app">
@@ -32,6 +33,7 @@ export default function DashboardPage() {
           <Route path="sales" element={<SalesTab />} />
           <Route path="rolls" element={<RollsTab />} />
           <Route path="goods" element={<GoodsTab />} />
+          <Route path="profile" element={<Profile />} />
           <Route path="*" element={<Navigate to={defaultPath} replace />} />
         </Routes>
       </main>

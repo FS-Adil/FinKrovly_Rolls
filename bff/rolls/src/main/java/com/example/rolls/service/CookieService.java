@@ -26,10 +26,16 @@ public class CookieService {
      * Имя основного session cookie с префиксом __Host-.
      * Должно использоваться ВЕЗДЕ, где читается/пишется/удаляется session cookie.
      */
-    public static final String SESSION_COOKIE_NAME = "__Host-session_id";
+//    public static final String SESSION_COOKIE_NAME = "__Host-session_id";
 
-    @Value("${app.cookie.same-site:Strict}")
+    @Value("${app.cookie.same-site}")
     private String sameSite;
+
+    @Value("${app.cookie.secure}")
+    private boolean cookieSecure;
+
+    @Value("${app.cookie.name}")
+    private String cookieName;
 
     /**
      * Установка cookie с ID сессии.
@@ -40,9 +46,9 @@ public class CookieService {
      *  - Domain = НЕ устанавливается (обязательно)
      */
     public void setSessionCookie(HttpServletResponse response, String sessionId, int maxAgeSeconds) {
-        ResponseCookie cookie = ResponseCookie.from(SESSION_COOKIE_NAME, sessionId)
+        ResponseCookie cookie = ResponseCookie.from(cookieName, sessionId)
                 .httpOnly(true)        // JavaScript не может прочитать
-                .secure(true)          // __Host- требует Secure=true
+                .secure(cookieSecure)          // __Host- требует Secure=true
                 .path("/")             // __Host- требует Path=/
                 .maxAge(maxAgeSeconds)
                 .sameSite(sameSite)    // защита от CSRF
@@ -57,9 +63,9 @@ public class CookieService {
      * Атрибуты ДОЛЖНЫ совпадать с setSessionCookie, иначе браузер не удалит cookie.
      */
     public void clearSessionCookie(HttpServletResponse response) {
-        ResponseCookie cookie = ResponseCookie.from(SESSION_COOKIE_NAME, "")
+        ResponseCookie cookie = ResponseCookie.from(cookieName, "")
                 .httpOnly(true)
-                .secure(true)
+                .secure(cookieSecure)
                 .path("/")
                 .maxAge(0)
                 .sameSite(sameSite)
@@ -79,7 +85,7 @@ public class CookieService {
                                       int maxAgeSeconds) {
         ResponseCookie cookie = ResponseCookie.from("__Secure-" + name, value)
                 .httpOnly(true)
-                .secure(true)
+                .secure(cookieSecure)
                 .path("/")
                 .domain(domain)        // разрешено для __Secure-
                 .maxAge(maxAgeSeconds)
@@ -101,12 +107,12 @@ public class CookieService {
      * Чтение sessionId из cookie запроса.
      * Единая точка чтения — используется и в контроллере, и в SessionService.
      */
-    public static String readSessionId(HttpServletRequest request) {
+    public String readSessionId(HttpServletRequest request) {
         if (request.getCookies() == null) {
             return null;
         }
         for (var cookie : request.getCookies()) {
-            if (SESSION_COOKIE_NAME.equals(cookie.getName())) {
+            if (cookieName.equals(cookie.getName())) {
                 return cookie.getValue();
             }
         }

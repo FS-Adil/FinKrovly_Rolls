@@ -31,16 +31,62 @@ function redirectToLogin(): void {
   window.location.href = loginPath;
 }
 
+/* ======================= CSRF ======================= */
+
+/** Читает cookie по имени. Spring кладёт CSRF-токен в cookie `XSRF-TOKEN`. */
+function getCookie(name: string): string | null {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = document.cookie.match(new RegExp('(?:^|;\\s*)' + escaped + '=([^;]*)'));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+/** Методы, для которых Spring Security требует CSRF-токен. */
+const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+/**
+ * Страховка: если cookie `XSRF-TOKEN` ещё нет — делаем GET /auth/me,
+ * чтобы CsrfFilter сгенерировал токен и выставил cookie.
+ * Вызывается перед первым небезопасным запросом.
+ */
+let csrfWarmed = false;
+async function ensureCsrf(): Promise<void> {
+  if (csrfWarmed || getCookie('XSRF-TOKEN')) {
+    csrfWarmed = true;
+    return;
+  }
+  try {
+    await fetch(BASE + '/auth/me', { credentials: 'include', method: 'GET' });
+  } catch {
+    // игнорируем — если и тут ошибка, сам запрос вернёт 401/403
+  } finally {
+    csrfWarmed = true;
+  }
+}
+
+/* ======================= REQUEST ======================= */
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { skipAuthRedirect, ...fetchOptions } = options;
+  const method = (fetchOptions.method ?? 'GET').toUpperCase();
+  const hasBody = fetchOptions.body != null;
+
+  const headers: Record<string, string> = {
+    // Content-Type нужен только когда есть тело; на GET он лишний
+    ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
+    ...(fetchOptions.headers as Record<string, string> ?? {})
+  };
+
+  // CSRF-заголовок для небезопасных методов
+  if (UNSAFE_METHODS.has(method)) {
+    const csrf = getCookie('XSRF-TOKEN');
+    if (csrf) headers['X-XSRF-TOKEN'] = csrf;
+  }
 
   const res = await fetch(BASE + path, {
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(fetchOptions.headers ?? {})
-    },
-    ...fetchOptions
+    ...fetchOptions,
+    method,
+    headers
   });
 
   if (res.status === 401) {
@@ -61,6 +107,37 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   return (ct.includes('application/json') ? await res.json() : await res.text()) as T;
 }
 
+/* ======================= ТИПЫ ОТЧЁТА «РУЛОНЫ» ======================= */
+
+/** Сырая строка отчёта «рулоны» — то, что реально приходит с бэка. */
+export interface RollsApiRow {
+  id?: string | number;
+  sku?: string;
+  name?: string;
+  organization?: string;
+  manufacturer?: string;
+  batch?: string | null;
+  pricePerSquareMeter?: number | null;
+  pricePerTon?: number | null;
+  areaSquareMeters?: number | null;
+  weightTons?: number | null;
+  quantity?: number | null;
+  weight?: number | null;
+  batchDate?: string | null;
+  [key: string]: unknown;
+}
+
+function normalizeRows<T>(data: unknown): T[] {
+  if (Array.isArray(data)) return data as T[];
+  if (data && typeof data === 'object' && 'rows' in data) {
+    const rows = (data as { rows: unknown }).rows;
+    if (Array.isArray(rows)) return rows as T[];
+  }
+  return [];
+}
+
+/* ======================= API ======================= */
+
 export const api = {
   login: (email: string, password: string): Promise<LoginResponse> =>
     request<LoginResponse>('/auth/login', {
@@ -76,8 +153,18 @@ export const api = {
     request<User>('/auth/me', { skipAuthRedirect: opts?.skipAuthRedirect }),
 
   calculate: (report: ReportName, params: ReportParams = {}): Promise<ReportResponse> =>
-    request<ReportResponse>(`/reports/${report}`, {
+    request<ReportResponse>(`/v1/reports/${report}`, {
       method: 'POST',
       body: JSON.stringify(params)
-    })
+    }),
+
+  /** Отчёт «остатки рулонов» — уже нормализованный в массив строк. */
+  rolls: async (params: ReportParams = {}): Promise<RollsApiRow[]> => {
+    await ensureCsrf();
+    const data = await request<ReportResponse>('/v1/reports/rolls', {
+      method: 'POST',
+      body: JSON.stringify(params)
+    });
+    return normalizeRows<RollsApiRow>(data);
+  }
 };

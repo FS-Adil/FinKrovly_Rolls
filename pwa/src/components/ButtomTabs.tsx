@@ -10,10 +10,11 @@ export interface TabDef {
 
 const TABS: TabDef[] = [
   { to: '/app/settings',  label: 'Настройки', icon: '⚙️', adminOnly: true },
-  { to: '/app/financial', label: 'Финансы',   icon: '💰' },
-  { to: '/app/sales',     label: 'Продажи',   icon: '📈' },
+  { to: '/app/financial', label: 'Финансы',   icon: '💰', adminOnly: true },
+  { to: '/app/sales',     label: 'Продажи',   icon: '📈', adminOnly: true },
   { to: '/app/rolls',     label: 'Рулоны',    icon: '🧻' },
-  { to: '/app/goods',     label: 'Товары',    icon: '📦' }
+  { to: '/app/goods',     label: 'Товары',    icon: '📦' },
+  { to: '/app/profile',     label: 'Профиль',    icon: '⚙️' }
 ];
 
 export default function BottomTabs({ role }: { role: Role }) {
