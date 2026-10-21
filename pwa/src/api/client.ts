@@ -28,27 +28,20 @@ interface RequestOptions extends RequestInit {
 
 function redirectToLogin(): void {
   const loginPath = `${APP_BASE.replace(/\/$/, '')}/login`;
-  // Уже на странице логина — не редиректим, иначе получим петлю
   if (window.location.pathname === loginPath) return;
   window.location.href = loginPath;
 }
 
 /* ======================= CSRF ======================= */
 
-/** Читает cookie по имени. Spring кладёт CSRF-токен в cookie `XSRF-TOKEN`. */
 function getCookie(name: string): string | null {
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const match = document.cookie.match(new RegExp('(?:^|;\\s*)' + escaped + '=([^;]*)'));
   return match ? decodeURIComponent(match[1]) : null;
 }
 
-/** Методы, для которых Spring Security требует CSRF-токен. */
 const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
-/**
- * Страховка: если cookie `XSRF-TOKEN` ещё нет — делаем GET /auth/me,
- * чтобы CsrfFilter сгенерировал токен и выставил cookie.
- */
 let csrfWarmed = false;
 async function ensureCsrf(): Promise<void> {
   if (csrfWarmed || getCookie('XSRF-TOKEN')) {
@@ -92,12 +85,10 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   const hasBody = fetchOptions.body != null;
 
   const headers: Record<string, string> = {
-    // Content-Type нужен только когда есть тело; на GET он лишний
     ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
     ...(fetchOptions.headers as Record<string, string> ?? {})
   };
 
-  // CSRF-заголовок для небезопасных методов
   if (UNSAFE_METHODS.has(method)) {
     const csrf = getCookie('XSRF-TOKEN');
     if (csrf) headers['X-XSRF-TOKEN'] = csrf;
@@ -148,6 +139,7 @@ export interface RollsApiRow {
   [key: string]: unknown;
 }
 
+/** Из `{ rows: [...] }` или `[...]` — в массив. */
 function normalizeRows<T>(data: unknown): T[] {
   if (Array.isArray(data)) return data as T[];
   if (data && typeof data === 'object' && 'rows' in data) {
@@ -164,7 +156,7 @@ export const api = {
     const envelope = await request<AuthResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
-      skipAuthRedirect: true // 401 здесь = неверные креды, редирект не нужен
+      skipAuthRedirect: true
     });
     return mapAuthPayload(unwrap(envelope));
   },
@@ -179,19 +171,23 @@ export const api = {
     return mapAuthPayload(unwrap(envelope));
   },
 
-  calculate: (report: ReportName, params: ReportParams = {}): Promise<ReportResponse> =>
-    request<ReportResponse>(`/v1/reports/${report}`, {
+  /** Универсальный отчёт: разворачивает конверт и приводит к ReportResponse. */
+  calculate: async (report: ReportName, params: ReportParams = {}): Promise<ReportResponse> => {
+    const envelope = await request<ApiEnvelope<ReportResponse>>(`/v1/reports/${report}`, {
       method: 'POST',
       body: JSON.stringify(params)
-    }),
+    });
+    return unwrap(envelope);
+  },
 
   /** Отчёт «остатки рулонов» — уже нормализованный в массив строк. */
   rolls: async (params: ReportParams = {}): Promise<RollsApiRow[]> => {
     await ensureCsrf();
-    const data = await request<ReportResponse>('/v1/reports/rolls', {
+    const envelope = await request<ApiEnvelope<ReportResponse>>('/v1/reports/rolls', {
       method: 'POST',
       body: JSON.stringify(params)
     });
-    return normalizeRows<RollsApiRow>(data);
+    // Разворачиваем конверт → { rows: [...] } → массив строк
+    return normalizeRows<RollsApiRow>(unwrap(envelope));
   }
 };

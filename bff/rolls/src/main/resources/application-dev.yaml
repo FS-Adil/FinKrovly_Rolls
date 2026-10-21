@@ -48,6 +48,9 @@ app:
     auth-service:
       url: ${AUTH_SERVICE_URL}
       service-token: ${AUTH_SERVICE_TOKEN}
+    rolls-service:
+      url: ${ROLLS_SERVICE_URL}
+      service-token: ${ROLLS_SERVICE_TOKEN}
 
   # Настройки сессии
   session:

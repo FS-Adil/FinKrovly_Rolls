@@ -17,11 +17,11 @@ const rootEl = document.getElementById('root');
 if (!rootEl) throw new Error('Root element not found');
 
 ReactDOM.createRoot(rootEl).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <BrowserRouter basename={basename}>
       <AuthProvider>
         <App />
       </AuthProvider>
     </BrowserRouter>
-  </React.StrictMode>
+  // </React.StrictMode>
 );
