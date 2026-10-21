@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { api } from '../api/client';
 import type { User } from '../api/types';
+import { clearRollsCache } from '../pages/tabs/rollsCache';
 
 interface AuthContextValue {
   user: User | null;
@@ -32,13 +33,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (username: string, password: string): Promise<User> => {
-    const user = await api.login(username, password);   // ← уже User
+    const user = await api.login(username, password);
     setUser(user);
     return user;
   }, []);
 
   const logout = useCallback(async () => {
     try { await api.logout(); } catch { /* ignore */ }
+    clearRollsCache();
     setUser(null);
   }, []);
 

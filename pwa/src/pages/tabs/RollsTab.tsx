@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { api, ApiError, type RollsApiRow } from '../../api/client';
+import { ApiError } from '../../api/client';
+import { getRolls, refreshRolls } from './rollsCache';
 import './RollsTab.css';
 
 /* ============================ ТИПЫ ============================ */
@@ -49,7 +50,7 @@ interface Product {
   batchDate?: string | null;
 }
 
-/* ======================= УТИЛИТЫ (из RN) ======================= */
+/* ======================= УТИЛИТЫ ======================= */
 
 const normalizeText = (text?: string | null) =>
   text?.toString().toLowerCase().replace(/\s+/g, ' ').trim() || '';
@@ -188,7 +189,7 @@ const filterSections = (sections: OrganizationGroup[], query: string) => {
 };
 
 /** Адаптер: сырая строка API → Product, который ждёт groupProducts. */
-const mapRowToProduct = (row: RollsApiRow): Product => ({
+const mapRowToProduct = (row: import('../../api/client').RollsApiRow): Product => ({
   id: row.id ?? row.sku,
   name: row.name,
   organization: row.organization,
@@ -355,11 +356,11 @@ export default function RollsTab() {
   const [collapsedOrganizations, setCollapsedOrganizations] = useState<Record<string, boolean>>({});
   const [collapsedManufacturers, setCollapsedManufacturers] = useState<Record<string, boolean>>({});
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (force = false) => {
     setIsLoading(true);
     setErr(null);
     try {
-      const rows = await api.rolls();
+      const rows = force ? await refreshRolls() : await getRolls();
       setSections(groupProducts(rows.map(mapRowToProduct)));
     } catch (e) {
       setErr(e instanceof ApiError ? e.message : 'Ошибка загрузки данных');
@@ -413,7 +414,12 @@ export default function RollsTab() {
     <div className="rolls-page">
       <div className="rolls-page__toolbar">
         <h2 className="rolls-page__title">Список рулонов</h2>
-        <button type="button" className="btn btn--primary" onClick={load} disabled={isLoading}>
+        <button
+          type="button"
+          className="btn btn--primary"
+          onClick={() => load(true)}
+          disabled={isLoading}
+        >
           {isLoading ? 'Загрузка…' : 'Обновить'}
         </button>
       </div>
