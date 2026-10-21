@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,9 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
+
+    @Value("${app.services.auth-service.url}")
+    private String authServiceUrl;
 
     private final AuthServiceClient authServiceClient;
     private final TracerUtil tracerUtil;
@@ -58,6 +62,13 @@ public class AuthController {
             JsonNode root = objectMapper.valueToTree(
                     authServiceClient.authenticate(email, request.password())
             );
+
+            if (root.isNull()) {
+                log.error("Сервер авторизации по адресу >> {} << не доступен!", authServiceUrl);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        ApiResponse.error(tracerUtil.currentTraceId(), 404, "Сервер авторизации не доступен!")
+                );
+            }
 
             String orgName = root.path("data").path("organization").path("name").asString();
             String orgId = root.path("data").path("organization").path("id").asString();
