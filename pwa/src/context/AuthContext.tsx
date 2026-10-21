@@ -24,7 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    api.me( {skipAuthRedirect: true} )
+    api.me({ skipAuthRedirect: true })
       .then(u => { if (!cancelled) setUser(u); })
       .catch(() => { if (!cancelled) setUser(null); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -32,13 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (username: string, password: string): Promise<User> => {
-    const u = await api.login(username, password);
-    const user: User = {
-      username: u.username,
-      fullName: u.fullName,
-      role: u.role,
-      organization: u.organization
-    };
+    const user = await api.login(username, password);   // ← уже User
     setUser(user);
     return user;
   }, []);

@@ -1,5 +1,7 @@
 import type {
-  LoginResponse,
+  ApiEnvelope,
+  AuthPayload,
+  AuthResponse,
   ReportName,
   ReportParams,
   ReportResponse,
@@ -46,7 +48,6 @@ const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 /**
  * Страховка: если cookie `XSRF-TOKEN` ещё нет — делаем GET /auth/me,
  * чтобы CsrfFilter сгенерировал токен и выставил cookie.
- * Вызывается перед первым небезопасным запросом.
  */
 let csrfWarmed = false;
 async function ensureCsrf(): Promise<void> {
@@ -61,6 +62,26 @@ async function ensureCsrf(): Promise<void> {
   } finally {
     csrfWarmed = true;
   }
+}
+
+/* ======================= АДАПТЕРЫ БЭК → ФРОНТ ======================= */
+
+/** Разворачивает конверт `{ code, data, ... }` → `data`. */
+function unwrap<T>(envelope: ApiEnvelope<T>): T {
+  return envelope.data;
+}
+
+/** Мапит payload бэка (`{ user, organization }`) в плоский `User`. */
+function mapAuthPayload(payload: AuthPayload): User {
+  const u = payload?.user;
+  const org = payload?.organization;
+  const email = u?.email ?? '';
+  return {
+    username: email,
+    fullName: u?.fullName ?? u?.name ?? email,
+    role: (u?.role as User['role']) ?? 'USER',
+    organization: org?.name ?? ''
+  };
 }
 
 /* ======================= REQUEST ======================= */
@@ -139,18 +160,24 @@ function normalizeRows<T>(data: unknown): T[] {
 /* ======================= API ======================= */
 
 export const api = {
-  login: (email: string, password: string): Promise<LoginResponse> =>
-    request<LoginResponse>('/auth/login', {
+  login: async (email: string, password: string): Promise<User> => {
+    const envelope = await request<AuthResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
       skipAuthRedirect: true // 401 здесь = неверные креды, редирект не нужен
-    }),
+    });
+    return mapAuthPayload(unwrap(envelope));
+  },
 
   logout: (): Promise<void> =>
     request<void>('/auth/logout', { method: 'POST' }),
 
-  me: (opts?: { skipAuthRedirect?: boolean }): Promise<User> =>
-    request<User>('/auth/me', { skipAuthRedirect: opts?.skipAuthRedirect }),
+  me: async (opts?: { skipAuthRedirect?: boolean }): Promise<User> => {
+    const envelope = await request<AuthResponse>('/auth/me', {
+      skipAuthRedirect: opts?.skipAuthRedirect
+    });
+    return mapAuthPayload(unwrap(envelope));
+  },
 
   calculate: (report: ReportName, params: ReportParams = {}): Promise<ReportResponse> =>
     request<ReportResponse>(`/v1/reports/${report}`, {
